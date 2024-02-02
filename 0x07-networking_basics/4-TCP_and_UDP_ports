@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Display UNIX domain sockets
+netstat -x
