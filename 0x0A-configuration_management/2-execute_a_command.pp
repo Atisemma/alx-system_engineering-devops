@@ -1,5 +1,6 @@
 #!/bin/bash
-while [[ true ]]
-do
-    sleep 2
-done
+exec { 'killmenow':
+  command     => 'pkill killmenow',
+  path        => ['/usr/bin', '/bin'],
+  refreshonly => true,
+}
