@@ -1,6 +1,6 @@
 #!/bin/bash
 exec { 'killmenow':
-  command     => 'pkill killmenow',
-  path        => ['/usr/bin', '/bin'],
-  refreshonly => true,
+  command => 'pkill killmenow',
+  onlyif  => 'pgrep killmenow',
+  path    => '/usr/bin:/usr/sbin:/bin:/sbin',
 }
