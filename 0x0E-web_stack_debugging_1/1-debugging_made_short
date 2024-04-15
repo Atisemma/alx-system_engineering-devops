@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Configures a server to listening on port 80
+
 sudo ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 sudo service nginx restart
-if ! pgrep -x "nginx" >/dev/null; then
-  echo " * nginx is not running"
-fi
+pgrep -x "nginx" >/dev/null || echo " * nginx is not running"
