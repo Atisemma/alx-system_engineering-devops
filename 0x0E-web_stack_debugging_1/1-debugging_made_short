@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # Configures a server to listening on port 80 on all IPs
-
 sudo ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 sudo service nginx restart
-if ! service nginx status | grep -q "active (running)"; then sudo pkill nginx; fi
+sudo kill "$(pgrep nginx | head -n 1)"
