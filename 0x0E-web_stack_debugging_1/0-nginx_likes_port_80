@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Configures a server to listen to port 80 of all servers active IPs
+
+sudo ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+sudo service nginx restart
