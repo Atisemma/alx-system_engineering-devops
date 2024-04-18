@@ -1,24 +1,42 @@
 #!/usr/bin/env bash
-# Define a function to display information about a subdomain
-display_info() {
-    # Execute the dig command to get DNS information for the subdomain
-    result=$(dig "$1"."$2" +short)
-
-    # Extract the IP address and record type using awk
-    ip=$(echo "$result" | awk '{print $1}')
-    record_type=$(echo "$result" | awk '{print $2}')
-
-    # Print the extracted information
-    echo "The subdomain $1 is a $record_type record and points to $ip"
+# Configuring domain zone
+# Function to display usage message
+display_usage() {
+    echo "Usage: $0 <domain> [<subdomain>]"
+    echo "Example: $0 holberton.online"
+    echo "Example: $0 holberton.online web-02"
 }
 
-# If only domain argument is provided, display information for default subdomains
-if [ $# -eq 1 ]; then
-    display_info www "$1" "www"
-    display_info lb-01 "$1" "lb-01"
-    display_info web-01 "$1" "web-01"
-    display_info web-02 "$1" "web-02"
-# If both domain and subdomain arguments are provided, display information for the specified subdomain
-elif [ $# -eq 2 ]; then
-    display_info "$2" "$1"
-fi
+# Function to retrieve DNS information for a specific subdomain
+print_domain_subdomain() {
+    local subdomain="$1"
+    local domain="$2"
+    local ip
+    ip=$(dig +short "$subdomain.$domain" | awk 'NR==1{print}')
+    local record_type
+    record_type=$(dig +short "$subdomain.$domain" | awk 'NR==1{print $4}')
+    echo "The subdomain $subdomain is a $record_type record and points to $ip"
+}
+
+# Function to audit subdomains of a domain
+audit_domain() {
+    local domain="$1"
+    local subdomains=("www" "lb-01" "web-01" "web-02")
+    for subdomain in "${subdomains[@]}"; do
+        print_domain_subdomain "$subdomain" "$domain"
+    done
+}
+
+# Main function to handle script execution
+main() {
+    if [ "$#" -eq 1 ]; then
+        audit_domain "$1"
+    elif [ "$#" -eq 2 ]; then
+        print_domain_subdomain "$2" "$1"
+    else
+        display_usage
+    fi
+}
+
+# Execute main function
+main "$@"
