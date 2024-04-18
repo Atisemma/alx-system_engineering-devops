@@ -1,42 +1,21 @@
 #!/usr/bin/env bash
 # Configuring domain zone
-# Function to display usage message
-display_usage() {
-    echo "Usage: $0 <domain> [<subdomain>]"
-    echo "Example: $0 holberton.online"
-    echo "Example: $0 holberton.online web-02"
+function get_dns_record {
+  domain=$1
+  subdomain=$2
+
+  if [[ -z "$subdomain" ]]; then
+    subdomains=("www" "lb-01" "web-01" "web-02")
+  else
+    subdomains=("$subdomain")
+  fi
+
+  for sub in "${subdomains[@]}"
+  do
+    record=$(dig "$sub"."$domain" | awk '$4=="A" {print $1}')
+    destination=$(dig "$sub"."$domain" | awk '$4=="A" {print $5}')
+    echo "The subdomain $sub is a $record record and points to $destination"
+  done
 }
 
-# Function to retrieve DNS information for a specific subdomain
-print_domain_subdomain() {
-    local subdomain="$1"
-    local domain="$2"
-    local ip
-    ip=$(dig +short "$subdomain.$domain" | awk 'NR==1{print}')
-    local record_type
-    record_type=$(dig +short "$subdomain.$domain" | awk 'NR==1{print $4}')
-    echo "The subdomain $subdomain is a $record_type record and points to $ip"
-}
-
-# Function to audit subdomains of a domain
-audit_domain() {
-    local domain="$1"
-    local subdomains=("www" "lb-01" "web-01" "web-02")
-    for subdomain in "${subdomains[@]}"; do
-        print_domain_subdomain "$subdomain" "$domain"
-    done
-}
-
-# Main function to handle script execution
-main() {
-    if [ "$#" -eq 1 ]; then
-        audit_domain "$1"
-    elif [ "$#" -eq 2 ]; then
-        print_domain_subdomain "$2" "$1"
-    else
-        display_usage
-    fi
-}
-
-# Execute main function
-main "$@"
+get_dns_record "$1" "$2"
