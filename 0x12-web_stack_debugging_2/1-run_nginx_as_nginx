@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Configures a container so that Nginx is running as the nginx user
+
+# Set nginx to run as the nginx user
+sed -i 's/user\s*nginx;/user nginx nginx;/g' /etc/nginx/nginx.conf
+
+# Listen on all active IPs on port 8080
+sed -i 's/listen\s*80;/listen 8080;/g' /etc/nginx/sites-available/default
+
+# Restart Nginx service
+service nginx restart
