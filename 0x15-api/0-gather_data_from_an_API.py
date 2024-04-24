@@ -4,13 +4,6 @@
 import sys
 import requests
 
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python3 gather_data_from_an_API.py <employee_id>")
-        sys.exit(1)
-
-    employee_id = sys.argv[1]
-    get_employee_todo_progress(employee_id)
 
 def get_employee_todo_progress(employee_id):
     # URL for employee information
@@ -36,3 +29,11 @@ def get_employee_todo_progress(employee_id):
     print(f"Employee {employee_name} is done with tasks({num_completed_tasks}/{total_tasks}):")
     for task in completed_tasks:
         print(f"    {task}")
+
+    if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python3 gather_data_from_an_API.py <employee_id>")
+        sys.exit(1)
+
+    employee_id = sys.argv[1]
+    get_employee_todo_progress(employee_id)
