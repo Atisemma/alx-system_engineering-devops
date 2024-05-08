@@ -1,11 +1,3 @@
-#!/usr/bin/python3
-""" Module for a function that queries the Reddit API recursively."""
-
-
-import requests
-import re
-
-
 def count_words(subreddit, word_list, hot_list=[], after=None, word_counts={}):
     """
     Recursive function that queries the Reddit API, parses the titles of all
