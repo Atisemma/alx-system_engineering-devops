@@ -1,56 +1,51 @@
 #!/usr/bin/python3
 """ Module for a function that queries the Reddit API recursively."""
 
+
 import requests
 import re
-from collections import Counter
 
 
-def count_words(subreddit, word_list):
+def count_words(subreddit, word_list, hot_list=[], after=None, word_counts={}):
     """
-    Recursive function counting occurrences of keywords in Reddit
-
-    Args:
-        subreddit (str): The name of the subreddit to query.
-        word_list (list): A list of keywords to search for.
-
-    Returns:
-        None
+    Recursive function that queries the Reddit API, parses the titles of all
+    hot articles and prints a sorted count of given case-insensitive keywords.
     """
-    # Set the API endpoint URL
-    url = f'https://www.reddit.com/r/{subreddit}/hot.json'
+    url = "https://www.reddit.com/r/{}/hot.json".format(subreddit)
+    headers = {"User-Agent": "MyRedditAPIPython/0.1"}
+    params = {"limit": 100}
+    if after:
+        params["after"] = after
 
-    # Set the headers to avoid being blocked by Reddit
-    headers = {'User-Agent': 'Mozilla/5.0'}
+    response = requests.get(url, headers=headers,
+                            params=params, allow_redirects=False)
 
-    # Make the API request
-    try:
-        response = requests.get(url, headers=headers, timeout=5)
-    except requests.exceptions.RequestException as e:
-        print(f"Error: {e}")
-        return
-
-    # Check if the response is successful
     if response.status_code == 200:
-        # Parse the JSON data
-        data = response.json()
+        try:
+            data = response.json()
+            posts = data["data"]["children"]
+            after = data["data"]["after"]
+            for post in posts:
+                title = post["data"]["title"].lower()
+                for word in word_list:
+                    count = len(re.findall(r'\b{}\b'.format(word.lower()),
+                                           title))
+                    word_counts[word.lower()] = word_counts.get(
+                        word.lower(), 0) + count
+                hot_list.extend([post["data"]["title"]
+                                for _ in range(count)])
 
-        # Extract the titles of the hot posts
-        titles = [
-            post['data']['title'].lower() for post in data['data']['children']
-        ]
-
-        # Count the occurrences of the keywords
-        word_counts = Counter()
-        for title in titles:
-            for word in word_list:
-                # Use a regular expression to match the keyword
-                pattern = r'\b' + re.escape(word.lower()) + r'\b'
-                word_counts[word.lower()] += len(re.findall(pattern, title))
-
-        # Print the sorted results
-        for w, c in sorted(word_counts.items(), key=lambda x: (-x[1], x[0])):
-            print(f"{word}: {count}")
+            if after is not None:
+                return count_words(subreddit, word_list, hot_list,
+                                   after, word_counts)
+            else:
+                sorted_counts = sorted(
+                    [(count, word) for word, count in word_counts.items()],
+                    reverse=True)
+                for count, word in sorted_counts:
+                    if count > 0:
+                        print("{}: {}".format(word, count))
+        except (KeyError, ValueError):
+            pass
     else:
-        # If the subreddit is invalid or no results are found, do nothing
         pass
